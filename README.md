@@ -1,0 +1,1 @@
+next-redux-material-ui-starter Starter kit for Next js with Redux warapper and Material-ui Theme set-up
