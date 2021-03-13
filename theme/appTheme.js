@@ -5,7 +5,63 @@ import palette from '../theme/palette';
 
  const appTheme = (mode,color)=>{
 
-  const theme = createMuiTheme(palette,mode,color,{
+  const theme = createMuiTheme({
+    spacing: 1,
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 960,
+        lg: 1608,
+        xl: 1920,
+      },
+    },
+    overrides: {
+      MuiPaper:{
+        root:{
+          // backgroundColor: '#ffff00'
+        },
+      },
+      MuiTab: {
+        root: {
+          maxHeight: 2,
+          fontSize: 9,
+          minWidth: 10,
+        }
+      },
+      MuiButton: {
+        outlined: {
+          borderRadius: '0'
+        }
+      },
+      MuiTable:{
+        root:{
+          width: '100%',
+        }
+      },
+      MuiTableCell: {
+        root:{
+          padding: 1,
+          textAlign: 'center',
+        },
+      },
+      MuiSlider:{
+        marked:{
+          // backgroundColor: 'blue',
+          marginRight: 5,
+          marginLeft: 5,
+        },
+        rail:{
+          marginRight: 5,
+          marginLeft: 5,
+          height: 3,
+        },
+        thumb: {
+          marginRight: 5,
+          marginLeft: 5
+        }
+      },
+    },
     palette: {  
       type: mode,
       primary: palette[color].palette.primary,
@@ -26,26 +82,10 @@ import palette from '../theme/palette';
         disabled: '#a4a4a4',
   } ,
       background:{
-        paper: mode === 'dark' ? '#131625' : '#fff',
-        default: mode === 'dark' ? 'black' : '#131625',
-        level1: mode === 'dark' ? "#1a237e": '#9e9e9e',
+        // paper: mode === 'dark' ? '#131625' : '#fff',
+        // default: mode === 'dark' ? 'black' : '#131625',
+        // level1: mode === 'dark' ? "#1a237e": '#9e9e9e',
       }
-    },
-    overrides:{
-      MuiPaper:{
-        root:{
-          // backgroundColor: '#ffff00'
-        },
-      },
-      MuiButton:{
-        containedPrimary:{
-          // backgroundColor: 'red',
-          // color: 'blue',
-        },
-        label:{
-          // color: 'green'
-        }
-      },
     },
     typography: {
       fontFamily: [
@@ -55,7 +95,7 @@ import palette from '../theme/palette';
       ].join(','),
       fontSize: 12,
       allVariants: {
-        color:  mode === 'light' ? '#131625' : '#fafafa',
+        // color:  mode === 'light' ? '#131625' : '#fafafa',
       },
     },
     shade: {

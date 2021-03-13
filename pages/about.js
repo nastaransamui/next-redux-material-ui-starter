@@ -12,17 +12,26 @@ import { useTheme, makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Header from '../src/Header/Header'
 import Head from 'next/head';
+import { Paper } from '@material-ui/core';
+import footerText from '../public/locale/footer.json';
+import { csrfToken } from 'next-auth/client'
+import AboutPage from '../src/About/AboutPage'
+import header from '../public/locale/header.json'
+
+
 const useStyles = makeStyles(theme => ({
   containerWrap: {
     marginTop: theme.spacing(10),
+    minHeight: '100vh'
   },
   mainWrap: {
     position: 'relative',
     width: '100%',
     overflow: 'hidden',
-    background: theme.palette.type === 'dark' ? theme.palette.background.default : theme.palette.background.paper,
+    background: theme.palette.background.paper,
     color: theme.palette.text.primary,
   },
+  appBarSpacer: theme.mixins.toolbar,
 }));
 export default function About(props) {
   const classes = useStyles();
@@ -35,28 +44,40 @@ export default function About(props) {
     </title>
   </Head>
   <CssBaseline />
-  <div className={classes.mainWrap}>
-    <Header {...props} />
-    <main className={classes.containerWrap}>
-        <Typography variant="h4" component="h1" gutterBottom>About Page will come here</Typography>
-    </main>
-    </div>
+      <div className={classes.mainWrap}>
+        <Header {...props} />
+        <main className={classes.containerWrap}>
+              <div className={classes.appBarSpacer} />
+              <AboutPage {...props}/>
+        </main>
+        </div>
+        <Copyright {...props}/>
     </Fragment>
   );
 }
 export const getServerSideProps = wrapper.getServerSideProps(async (ctx) =>{
   if (!checkCookies(ctx, 'themeType')) {
-    setCookies(ctx, 'themeType', 'light'); 
-    ctx.store.dispatch({type: 'themeType', payload: 'light'});
+    setCookies(ctx, 'themeType', 'dark'); 
+    ctx.store.dispatch({type: 'themeType', payload: 'dark'});
   } else {
     ctx.store.dispatch({type: 'themeType', payload: getCookies(ctx, 'themeType')})
   }
   if (!checkCookies(ctx, 'themeName')) {
-    setCookies(ctx, 'themeName', 'oceanBlue'); 
-    ctx.store.dispatch({type: 'themeName', payload: 'oceanBlue'});
+    setCookies(ctx, 'themeName', 'deepBlue'); 
+    ctx.store.dispatch({type: 'themeName', payload: 'deepBlue'});
   } else {
     ctx.store.dispatch({type: 'themeName', payload: getCookies(ctx, 'themeName')})
   }
+  if (!checkCookies(ctx, `next-i18next`)) {
+    setCookies(ctx, `next-i18next`, 'en'); 
+    ctx.store.dispatch({type: `next-i18next`, payload: 'en'});
+  } else {
+    ctx.store.dispatch({type: `next-i18next`, payload: getCookies(ctx, `next-i18next`)})
+  }
   const cookies = getCookies(ctx);
-  return {props: {cookies}}
+  return {props: {
+    cookies, 
+    header,
+    footerText
+  }}
 })

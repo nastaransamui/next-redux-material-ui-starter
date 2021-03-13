@@ -13,21 +13,27 @@ import { wrapper } from '../redux/store'
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { Paper } from '@material-ui/core';
-const useStyles = makeStyles(theme => ({
+import header from '../public/locale/header.json';
+import MainPage from '../src/MainPage'
+import footerText from '../public/locale/footer.json';
+
+export const useStyles = makeStyles(theme => ({
   containerWrap: {
-    marginTop: 100,
-    minHeight: '100vh'
+    marginTop: theme.spacing(3),
+    minHeight: '100vh',
+    '& > section': {
+      position: 'relative'
+    }
   },
+  appBarSpacer: theme.mixins.toolbar,
   mainWrap: {
     position: 'relative',
     width: '100%',
     overflow: 'hidden',
-    background: theme.palette.type === 'dark' ? theme.palette.background.default : theme.palette.background.paper,
+    background: theme.palette.background.paper,
     color: theme.palette.text.primary,
   },
-  ButtonRoot:{
-    background: "red"
-  }
+  
 }));
 export default function Index(props) {
   const classes = useStyles();
@@ -43,10 +49,11 @@ export default function Index(props) {
       <div className={classes.mainWrap}>
         <Header {...props} />
         <main className={classes.containerWrap}>
-        <Typography variant="h4" component="h1" gutterBottom> Main Page will come here</Typography>
+              <div className={classes.appBarSpacer} />
+        <MainPage {...props}/>
         </main>
         </div>
-        <Copyright />
+        <Copyright {...props}/>
         </React.Fragment>
   );
 }
@@ -63,6 +70,16 @@ export const getServerSideProps = wrapper.getServerSideProps(async (ctx) =>{
   } else {
     ctx.store.dispatch({type: 'themeName', payload: getCookies(ctx, 'themeName')})
   }
+  if (!checkCookies(ctx, `next-i18next`)) {
+    setCookies(ctx, `next-i18next`, 'en'); 
+    ctx.store.dispatch({type: `next-i18next`, payload: 'en'});
+  } else {
+    ctx.store.dispatch({type: `next-i18next`, payload: getCookies(ctx, `next-i18next`)})
+  }
   const cookies = getCookies(ctx);
-  return {props: {cookies}}
+  return {props: {
+    cookies,
+    header,
+    footerText
+  }}
 })

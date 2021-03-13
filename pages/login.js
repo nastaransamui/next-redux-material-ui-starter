@@ -14,12 +14,25 @@ import Typography from '@material-ui/core/Typography';
 import {  useTheme, makeStyles } from '@material-ui/core/styles';
 import Head from 'next/head';
 import Header from '../src/Header/Header';
-function Copyright() {
+import { wrapper } from '../redux/store';
+import { setCookies,getCookies, checkCookies } from 'cookies-next';
+import header from '../public/locale/header.json'
+import loginText from '../public/locale/login.json';
+import copyrightText from '../public/locale/copyright.json'
+import {useSelector} from 'react-redux';
+import Fab from '@material-ui/core/Fab';
+import {  FaFacebookF, FaGoogle,FaTwitter } from  'react-icons/fa';
+import { useRouter } from 'next/router'
+import { signIn, signOut, useSession,getSession } from 'next-auth/client'
+
+function Copyright(props) {
+  const {"next-i18next": nextI18Next }= useSelector(state => state)
+  const {copyrightText} = props;
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+      {`${copyrightText[`${nextI18Next}_copyright`]} © `}
+      <Link color="inherit" href="">
+      {`${copyrightText[`${nextI18Next}_website`]}`}
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -29,7 +42,7 @@ function Copyright() {
 
 const useStyles = makeStyles((theme) => ({
   containerWrap: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(65),
   },
   mainWrap: {
     position: 'relative',
@@ -66,11 +79,49 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  facebook :{
+    backgroundColor: '#3b5998',
+    color: '#fff',
+    disableRipple: true,
+    "&:hover": {
+        backgroundColor: "#002a81"
+      }
+},
+google: {
+    backgroundColor: "#DB4437",
+    color:"#fff",
+    "&:hover": {
+        backgroundColor: "#ff1400"
+      }
+},
+twitter: {
+    backgroundColor: "#38A1F3",
+    color:"#fff",
+    "&:hover": {
+        backgroundColor: "#007fe2"
+      }
+},
+font: {
+    fontSize: '24px'
+}
 }));
+const renderSocialIcon = (provider) =>{
+  switch (provider) {
+    case 'facebook':
+      return <FaFacebookF />
+    case 'google':
+     return    <FaGoogle />
+    case 'twitter':
+      return   <FaTwitter />
+    break;
+  }
+}
 
 export default function SignInSide(props) {
   const classes = useStyles();
   const theme = useTheme();
+  const router = useRouter()
+  const {"next-i18next": nextI18Next }= useSelector(state => state)
   const submit = (e) =>{
     e.preventDefault()
     console.log('submit')
@@ -93,8 +144,25 @@ export default function SignInSide(props) {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            {loginText[`${nextI18Next}_login_singIn`]}
           </Typography>
+          <Grid container direction="row" justify="space-evenly" alignItems="center" style={{padding: 20}}>
+          <>{
+          ['facebook', 'google', 'twitter'].map((provider, i) => {
+            return(
+              <div key={i.toString()}>
+            <Grid container >
+            <Fab variant="round" onClick={() =>{
+              signIn(provider, { callbackUrl: `http://localhost:3000${router.pathname}` })
+            } }
+                className={classes[`${provider}`]}>
+                {renderSocialIcon(provider)}
+            </Fab>
+        </Grid>
+            </div>
+            )
+          })}</>
+            </Grid>
           <form className={classes.form} noValidate>
             <TextField
               variant="outlined"
@@ -102,25 +170,10 @@ export default function SignInSide(props) {
               required
               fullWidth
               id="email"
-              label="Email Address"
+              label={loginText[`${nextI18Next}_login_email_label`]}
               name="email"
               autoComplete="email"
               autoFocus
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
             />
             <Button
               fullWidth
@@ -129,22 +182,10 @@ export default function SignInSide(props) {
               onClick={submit}
               className={classes.submit}
             >
-              Sign In
+              {loginText[`${nextI18Next}_signin_button`]}
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
             <Box mt={5}>
-              <Copyright />
+              <Copyright {...props}/>
             </Box>
           </form>
         </div>
@@ -156,3 +197,41 @@ export default function SignInSide(props) {
     </Fragment>
   );
 }
+export const getServerSideProps = wrapper.getServerSideProps(async (ctx) =>{
+  if (!checkCookies(ctx, 'themeType')) {
+    setCookies(ctx, 'themeType', 'dark'); 
+    ctx.store.dispatch({type: 'themeType', payload: 'dark'});
+  } else {
+    ctx.store.dispatch({type: 'themeType', payload: getCookies(ctx, 'themeType')})
+  }
+  if (!checkCookies(ctx, 'themeName')) {
+    setCookies(ctx, 'themeName', 'deepBlue'); 
+    ctx.store.dispatch({type: 'themeName', payload: 'deepBlue'});
+  } else {
+    ctx.store.dispatch({type: 'themeName', payload: getCookies(ctx, 'themeName')})
+  }
+  if (!checkCookies(ctx, `next-i18next`)) {
+    setCookies(ctx, `next-i18next`, 'en'); 
+    ctx.store.dispatch({type: `next-i18next`, payload: 'en'});
+  } else {
+    ctx.store.dispatch({type: `next-i18next`, payload: getCookies(ctx, `next-i18next`)})
+  }
+  const cookies = getCookies(ctx);
+  const session = await getSession(ctx);
+  if(ctx.res && session !== null ){
+    return{
+      redirect:{
+        permanent: false,
+        destination: '/'
+      }
+    }
+  }
+  return {props: 
+    {
+    session,
+    cookies,
+    header,
+    loginText,
+    copyrightText
+  }}
+})
